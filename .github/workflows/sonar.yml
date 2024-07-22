@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          
       - name: scan code with sonarqube
         uses: sonarsource/sonarqube-scan-action@master
         env:
@@ -27,6 +28,15 @@ jobs:
 
       - name: Trivy file scan
         run: trivy fs . > trivyfs.txt
+        
+      - name: Build & Push to Docker
+        run: |
+          docker build -t tic-tac-toe .
+          docker tag tic-tac-toe dayo777/tic-tac-toe:latest
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          docker push dayo777/tic-tac-toe:latest
+        env:
+          DOCKER_CLI_ACI: 1
       # If you wish to fail your job when the Quality Gate is red, uncomment the
       # following lines. This would typically be used to fail a deployment.
       # - uses: sonarsource/sonarqube-quality-gate-action@master
